@@ -104,11 +104,28 @@ class App extends React.Component {
             this.db.mutationUpdateSessionData(this.state.sessionData);
         });
     }
+    // THIS FUNCTION RENAMES AN ITEM OF THE CURRENT LIST
     renameItem = (index, value) => {
         let newList = this.state.currentList;
 
         newList.items[index] = value;
                 
+        this.setState(prevState => ({
+            currentList: newList,
+            sessionData: prevState.sessionData
+        }), () => {
+            let list = this.db.queryGetList(this.state.currentList);
+            list = newList;
+            this.db.mutationUpdateList(list);
+            this.db.mutationUpdateSessionData(this.state.sessionData);
+        });
+    }
+    // THIS FUNCTION MOVES THE ITEMS OF THE LIST AROUND
+    moveItem = (oldIndex, newIndex) => {
+        let newList = this.state.currentList;
+
+        newList.items.splice(newIndex, 0, newList.items.splice(oldIndex, 1)[0]);
+
         this.setState(prevState => ({
             currentList: newList,
             sessionData: prevState.sessionData
@@ -175,6 +192,7 @@ class App extends React.Component {
                 <Workspace
                     currentList={this.state.currentList} 
                     renameItemCallback={this.renameItem}
+                    moveItemCallback={this.moveItem}
                 />
                 <Statusbar 
                     currentList={this.state.currentList} />

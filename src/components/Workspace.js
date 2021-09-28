@@ -3,7 +3,7 @@ import ItemCard from "./ItemCard"
 
 export default class Workspace extends React.Component {
     render() {
-        const { currentList, renameItemCallback } = this.props;
+        const { currentList, renameItemCallback, moveItemCallback } = this.props;
         return (
             <div id="top5-workspace">
                 <div id="workspace-edit">
@@ -17,7 +17,12 @@ export default class Workspace extends React.Component {
                     <div id="list-items">
                         {currentList
                             ? currentList.items.map((name, num) => {
-                                return <ItemCard key={num} index={num} text={name} renameItemCallback={renameItemCallback} > </ItemCard>;
+                                return <ItemCard 
+                                    key={num} 
+                                    index={num} 
+                                    text={name} 
+                                    renameItemCallback={renameItemCallback} 
+                                    moveItemCallback={moveItemCallback}/> ;
                             })
                             : console.log("")
                         }
