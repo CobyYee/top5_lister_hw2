@@ -1,7 +1,9 @@
 import React from "react";
+import ItemCard from "./ItemCard"
 
 export default class Workspace extends React.Component {
     render() {
+        const { currentList, renameItemCallback } = this.props;
         return (
             <div id="top5-workspace">
                 <div id="workspace-edit">
@@ -13,9 +15,9 @@ export default class Workspace extends React.Component {
                         <div className="item-number">5.</div>
                     </div>
                     <div id="list-items">
-                        {this.props.currentList
-                            ? this.props.currentList.items.map(function(name) {
-                                return <div className="top5-item"> {name} </div>;
+                        {currentList
+                            ? currentList.items.map((name, num) => {
+                                return <ItemCard key={num} index={num} text={name} renameItemCallback={renameItemCallback} > </ItemCard>;
                             })
                             : console.log("")
                         }
