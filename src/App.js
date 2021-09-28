@@ -24,7 +24,8 @@ class App extends React.Component {
         // SETUP THE INITIAL STATE
         this.state = {
             currentList : null,
-            sessionData : loadedSessionData
+            sessionData : loadedSessionData,
+            keyNamePair : null
         }
     }
     sortKeyNamePairsByName = (keyNamePairs) => {
@@ -69,6 +70,7 @@ class App extends React.Component {
             // PUTTING THIS NEW LIST IN PERMANENT STORAGE
             // IS AN AFTER EFFECT
             this.db.mutationCreateList(newList);
+            this.db.mutationUpdateSessionData(this.state.sessionData);
         });
     }
     renameList = (key, newName) => {
@@ -156,11 +158,16 @@ class App extends React.Component {
             // ANY AFTER EFFECTS?
         });
     }
-    deleteList = () => {
+    deleteList = (keyNamePair) => {
         // SOMEHOW YOU ARE GOING TO HAVE TO FIGURE OUT
         // WHICH LIST IT IS THAT THE USER WANTS TO
         // DELETE AND MAKE THAT CONNECTION SO THAT THE
         // NAME PROPERLY DISPLAYS INSIDE THE MODAL
+        this.setState(prevState => ({
+            currentList : prevState.currentList,
+            sessionData : prevState.sessionData,
+            keyNamePair: keyNamePair
+        }));
         this.showDeleteListModal();
     }
     // THIS FUNCTION SHOWS THE MODAL FOR PROMPTING THE USER
@@ -173,6 +180,41 @@ class App extends React.Component {
     hideDeleteListModal() {
         let modal = document.getElementById("delete-modal");
         modal.classList.remove("is-visible");
+    }
+    // THIS CALLBACK FUNCTION REMOVES A LIST
+    removeList = () => {
+        let newSessionData = this.db.queryGetSessionData();
+        let newKeyNamePairs = newSessionData.keyNamePairs;
+        let index = -1;
+        for (let i = 0; i < newKeyNamePairs.length; i++) {
+            let pair = newKeyNamePairs[i];
+            if (pair.key === this.state.keyNamePair.key) {
+                index = i;
+            }
+        }
+        newKeyNamePairs.splice(index, 1);
+        newSessionData.keyNamePairs = newKeyNamePairs;
+
+        if(this.state.keyNamePair.key === this.state.currentList.key) {
+            this.setState(prevState => ({
+                currentList : null,
+                sessionData : newSessionData,
+                keyNamePair : null
+            }), () => {
+                this.db.mutationUpdateSessionData(newSessionData);
+                this.closeCurrentList();
+            });
+        }
+        else {
+            this.setState(prevState => ({
+                currentList : prevState.currentList,
+                sessionData : newSessionData,
+                keyNamePair : null
+            }), () => {
+                this.db.mutationUpdateSessionData(newSessionData);
+            });
+        }
+        this.hideDeleteListModal();
     }
     render() {
         return (
@@ -197,7 +239,9 @@ class App extends React.Component {
                 <Statusbar 
                     currentList={this.state.currentList} />
                 <DeleteModal
+                    listKeyPair={this.state.keyNamePair}
                     hideDeleteListModalCallback={this.hideDeleteListModal}
+                    confirmDeleteCallback={this.removeList}
                 />
             </div>
         );

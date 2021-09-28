@@ -26,6 +26,7 @@ export default class Sidebar extends React.Component {
                     keyNamePairs.map((pair) => (
                         <ListCard
                             key={pair.key}
+                            currentList={currentList}
                             keyNamePair={pair}
                             selected={(currentList !== null) && (currentList.key === pair.key)}
                             deleteListCallback={deleteListCallback}
