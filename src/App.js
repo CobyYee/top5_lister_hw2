@@ -1,5 +1,8 @@
 import React from 'react';
 import './App.css';
+import jsTPS from './components/jsTPS.js';
+import ChangeItemTransaction from './transactions/ChangeItemTransaction.js';
+import MoveItemTransaction from './transactions/MoveItemTransaction.js';
 
 // IMPORT DATA MANAGEMENT AND TRANSACTION STUFF
 import DBManager from './db/DBManager';
@@ -20,6 +23,8 @@ class App extends React.Component {
 
         // GET THE SESSION DATA FROM OUR DATA MANAGER
         let loadedSessionData = this.db.queryGetSessionData();
+
+        this.tps = new jsTPS();
 
         // SETUP THE INITIAL STATE
         this.state = {
@@ -109,7 +114,6 @@ class App extends React.Component {
     // THIS FUNCTION RENAMES AN ITEM OF THE CURRENT LIST
     renameItem = (index, value) => {
         let newList = this.state.currentList;
-
         newList.items[index] = value;
                 
         this.setState(prevState => ({
@@ -125,7 +129,6 @@ class App extends React.Component {
     // THIS FUNCTION MOVES THE ITEMS OF THE LIST AROUND
     moveItem = (oldIndex, newIndex) => {
         let newList = this.state.currentList;
-
         newList.items.splice(newIndex, 0, newList.items.splice(oldIndex, 1)[0]);
 
         this.setState(prevState => ({
@@ -138,6 +141,17 @@ class App extends React.Component {
             this.db.mutationUpdateSessionData(this.state.sessionData);
         });
     }
+
+    addMoveTransaction = (oldIndex, newIndex) => {
+        let transaction = new MoveItemTransaction(this, oldIndex, newIndex);
+        this.tps.addTransaction(transaction);
+    }
+
+    addRenameTransaction = (index, value) => {
+        let transaction = new ChangeItemTransaction(this, index, this.state.currentList.items[index], value);
+        this.tps.addTransaction(transaction);
+    }
+
     // THIS FUNCTION BEGINS THE PROCESS OF LOADING A LIST FOR EDITING
     loadList = (key) => {
         let newCurrentList = this.db.queryGetList(key);
@@ -146,7 +160,14 @@ class App extends React.Component {
             sessionData: prevState.sessionData
         }), () => {
             // ANY AFTER EFFECTS?
+            this.tps.clearAllTransactions();
         });
+    }
+    undo = () => {
+        this.tps.undoTransaction();        
+    }
+    redo = () => {
+        this.tps.doTransaction();
     }
     // THIS FUNCTION BEGINS THE PROCESS OF CLOSING THE CURRENT LIST
     closeCurrentList = () => {
@@ -221,7 +242,10 @@ class App extends React.Component {
             <div id="app-root">
                 <Banner 
                     title='Top 5 Lister'
-                    closeCallback={this.closeCurrentList} />
+                    closeCallback={this.closeCurrentList} 
+                    redoCallback={this.redo}
+                    undoCallback={this.undo}
+                    tps={this.tps}/>
                 <Sidebar
                     heading='Your Lists'
                     currentList={this.state.currentList}
@@ -233,8 +257,8 @@ class App extends React.Component {
                 />
                 <Workspace
                     currentList={this.state.currentList} 
-                    renameItemCallback={this.renameItem}
-                    moveItemCallback={this.moveItem}
+                    renameItemCallback={this.addRenameTransaction}
+                    moveItemCallback={this.addMoveTransaction}
                 />
                 <Statusbar 
                     currentList={this.state.currentList} />
