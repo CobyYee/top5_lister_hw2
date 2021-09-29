@@ -11,7 +11,8 @@ export default class Banner extends React.Component {
                     closeCallback = {this.props.closeCallback} 
                     redoCallback = {this.props.redoCallback}
                     undoCallback = {this.props.undoCallback} 
-                    tps={this.tps}/>
+                    tps={this.props.tps}
+                    currentList={this.props.currentList}/>
             </div>
         );
     }

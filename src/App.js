@@ -154,13 +154,13 @@ class App extends React.Component {
 
     // THIS FUNCTION BEGINS THE PROCESS OF LOADING A LIST FOR EDITING
     loadList = (key) => {
+        this.tps.clearAllTransactions();
         let newCurrentList = this.db.queryGetList(key);
         this.setState(prevState => ({
             currentList: newCurrentList,
             sessionData: prevState.sessionData
         }), () => {
             // ANY AFTER EFFECTS?
-            this.tps.clearAllTransactions();
         });
     }
     undo = () => {
@@ -171,6 +171,7 @@ class App extends React.Component {
     }
     // THIS FUNCTION BEGINS THE PROCESS OF CLOSING THE CURRENT LIST
     closeCurrentList = () => {
+        this.tps.clearAllTransactions();
         this.setState(prevState => ({
             currentList: null,
             listKeyPairMarkedForDeletion : prevState.listKeyPairMarkedForDeletion,
@@ -216,7 +217,8 @@ class App extends React.Component {
         newKeyNamePairs.splice(index, 1);
         newSessionData.keyNamePairs = newKeyNamePairs;
 
-        if(this.state.keyNamePair.key === this.state.currentList.key) {
+        if((this.state.keyNamePair.key != null) && (this.state.keyNamePair.key === this.state.currentList.key)) {
+            this.tps.clearAllTransactions();
             this.setState(prevState => ({
                 currentList : null,
                 sessionData : newSessionData,
@@ -237,6 +239,7 @@ class App extends React.Component {
         }
         this.hideDeleteListModal();
     }
+
     render() {
         return (
             <div id="app-root">
@@ -245,7 +248,8 @@ class App extends React.Component {
                     closeCallback={this.closeCurrentList} 
                     redoCallback={this.redo}
                     undoCallback={this.undo}
-                    tps={this.tps}/>
+                    tps={this.tps}
+                    currentList={this.state.currentList}/>
                 <Sidebar
                     heading='Your Lists'
                     currentList={this.state.currentList}
