@@ -25,6 +25,7 @@ class App extends React.Component {
         let loadedSessionData = this.db.queryGetSessionData();
 
         this.tps = new jsTPS();
+        this.undoRedoEvent = this.undoRedoEvent.bind(this);
 
         // SETUP THE INITIAL STATE
         this.state = {
@@ -164,10 +165,20 @@ class App extends React.Component {
         });
     }
     undo = () => {
-        this.tps.undoTransaction();        
+        this.tps.undoTransaction();       
+        this.setState(prevState => ({
+            currentList: prevState.currentList,
+            sessionData: prevState.sessionData,
+            keyNamePair: prevState.keyNamePair
+        }));
     }
     redo = () => {
         this.tps.doTransaction();
+        this.setState(prevState => ({
+            currentList: prevState.currentList,
+            sessionData: prevState.sessionData,
+            keyNamePair: prevState.keyNamePair
+        }));
     }
     // THIS FUNCTION BEGINS THE PROCESS OF CLOSING THE CURRENT LIST
     closeCurrentList = () => {
@@ -238,6 +249,21 @@ class App extends React.Component {
             });
         }
         this.hideDeleteListModal();
+    }
+
+    undoRedoEvent(event) {
+        if(event.ctrlKey && event.keyCode === 90) {
+            this.undo();
+        }
+        if(event.ctrlKey && event.keyCode === 89) {
+            this.redo();
+        }
+    }
+    componentDidMount() {
+        document.addEventListener("keydown", this.undoRedoEvent, false);
+    }
+    componentWillUnmount() {
+        document.removeEventListener("keydown", this.undoRedoEvent, false);
     }
 
     render() {
