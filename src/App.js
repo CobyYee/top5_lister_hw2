@@ -228,7 +228,7 @@ class App extends React.Component {
         newKeyNamePairs.splice(index, 1);
         newSessionData.keyNamePairs = newKeyNamePairs;
 
-        if((this.state.keyNamePair.key != null) && (this.state.keyNamePair.key === this.state.currentList.key)) {
+        if((this.state.currentList != null) && (this.state.keyNamePair.key === this.state.currentList.key)) {
             this.tps.clearAllTransactions();
             this.setState(prevState => ({
                 currentList : null,

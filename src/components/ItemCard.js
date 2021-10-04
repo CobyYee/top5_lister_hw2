@@ -74,7 +74,8 @@ export default class ItemCard extends React.Component {
                 defaultValue = {this.props.text}
                 onKeyPress = {this.handleKeyPress}
                 onBlur = {this.handleBlur} 
-                onChange = {this.handleUpdate}/>);
+                onChange = {this.handleUpdate}
+                autoFocus/>);
         }
         else {
             return (<div 
